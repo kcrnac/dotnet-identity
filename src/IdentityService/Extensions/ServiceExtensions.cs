@@ -10,6 +10,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Text.Json;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.OpenApi.Models;
+using IdentityService.Models;
 
 namespace IdentityService.Extensions;
 
@@ -20,22 +24,40 @@ public static class ServiceExtensions
     public static IServiceCollection AppIdentityServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<ITokenService, TokenService>();
+
         services.AddDbContext<AppIdentityDbContext>(options =>
         {
             options.UseNpgsql(configuration.GetConnectionString(ConnectionStringName));
         });
 
-        services.AddIdentityCore<User>(options =>
-        {
-            // identity options
-        })
-        .AddEntityFrameworkStores<AppIdentityDbContext>()
-        .AddSignInManager<SignInManager<User>>();
+        services.AddIdentity<User, Role>(options =>
+            {
+
+            })
+            .AddEntityFrameworkStores<AppIdentityDbContext>()
+            .AddDefaultTokenProviders();
 
         var jwtOptions = new JwtOptions();
         configuration.GetSection(jwtOptions.GetSectionName()).Bind(jwtOptions);
 
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        services.AddAuthentication(options =>
+            {
+                /* TODO: Document this
+                 *  Using services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme) doesn't work properly and uses Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationHandler[12] AuthenticationScheme: Identity.Application was challenged. instead of Bearer
+                 *  Seems that issue started appear after changing services.AddIdentityCore -> services.AddIdentity
+                 *  And once custom Roles were introduced into Identity
+                 *  Logs
+                 *      Request starting HTTP/2 GET https://localhost:5001/api/Home/authenticated - -
+                        info: Microsoft.AspNetCore.Authorization.DefaultAuthorizationService[2]
+                              Authorization failed. These requirements were not met:
+                              DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+                        info: Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationHandler[12]
+                              AuthenticationScheme: Identity.Application was challenged.
+                 */
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
             .AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
@@ -84,16 +106,66 @@ public static class ServiceExtensions
 
         var context = services.GetRequiredService<AppIdentityDbContext>();
         var userManager = services.GetService<UserManager<User>>();
+        var roleManager = services.GetService<RoleManager<Role>>();
         var logger = services.GetService<ILogger<Program>>();
 
         try
         {
             await context.Database.MigrateAsync();
-            await AppIdentityDbContext.SeedUserAsync(userManager);
+            await AppIdentityDbContext.SeedDatabaseAsync(userManager, roleManager);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred during migration");
+            logger!.LogError(ex, "An error occurred during migration");
         }
+    }
+
+    public static void AddSwagger(this IServiceCollection services)
+    {
+        services.AddSwaggerGen(options =>
+        {
+            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                In = ParameterLocation.Header,
+                Description = "Please enter a valid token",
+                Name = "Authorization",
+                Type = SecuritySchemeType.Http,
+                BearerFormat = "JWT",
+                Scheme = "Bearer"
+            });
+            options.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    new string[]{}
+                }
+            });
+        });
+    }
+
+    public static void ConfigureApiBehaviorOptions(this IServiceCollection services)
+    {
+        services.Configure<ApiBehaviorOptions>(options =>
+        {
+            options.InvalidModelStateResponseFactory = actionContext =>
+            {
+                var errors = actionContext.ModelState
+                    .Where(e => e.Value?.Errors.Count > 0)
+                    .SelectMany(m => m.Value.Errors)
+                    .Select(m => m.ErrorMessage)
+                    .ToArray();
+
+                var response = new ApiValidationErrorResponse(errors);
+             
+                return new BadRequestObjectResult(response);
+            };
+        });
     }
 }

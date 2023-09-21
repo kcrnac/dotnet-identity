@@ -21,7 +21,7 @@ namespace IdentityService.Infrastructure.Services
             _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(options.Value.Key));
         }
 
-        public string CreateToken([NotNull] User user)
+        public string GenerateToken([NotNull] User user, List<string> roles)
         {
             ArgumentNullException.ThrowIfNull(user);
             ArgumentNullException.ThrowIfNull(user.Email);
@@ -32,11 +32,18 @@ namespace IdentityService.Infrastructure.Services
                 new (ClaimTypes.GivenName, user.FullName )
             };
 
+            if (roles.Any())
+            {
+                var roleClaims = roles.Select(role => new Claim(ClaimTypes.Role, role));
+
+                claims.AddRange(roleClaims);
+            }
+            
             var credentials = new SigningCredentials(_key, SecurityAlgorithms.HmacSha256Signature);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.Now.AddDays(1),
+                Expires = DateTime.Now.AddDays(double.Parse(_options.Value.Expires)),
                 SigningCredentials = credentials,
                 Issuer = _options.Value.Issuer
             };

@@ -10,6 +10,8 @@ namespace IdentityService.Infrastructure.Configuration.Options
 
         public string Key { get; init; }
 
+        public string Expires { get; init; }
+
         public string GetSectionName() => "Jwt";
     }
 }

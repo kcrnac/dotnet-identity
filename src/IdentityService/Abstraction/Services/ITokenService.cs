@@ -4,6 +4,6 @@ namespace IdentityService.Abstraction.Services
 {
     public interface ITokenService
     {
-        string CreateToken(User user);
+        string GenerateToken(User user, List<string> roles);
     }
 }
