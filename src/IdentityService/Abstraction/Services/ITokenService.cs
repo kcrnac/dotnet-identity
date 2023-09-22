@@ -1,9 +1,8 @@
 ﻿using IdentityService.Entities;
 
-namespace IdentityService.Abstraction.Services
+namespace IdentityService.Abstraction.Services;
+
+public interface ITokenService
 {
-    public interface ITokenService
-    {
-        string GenerateToken(User user, List<string> roles);
-    }
+    string GenerateToken(User user, List<string> roles);
 }

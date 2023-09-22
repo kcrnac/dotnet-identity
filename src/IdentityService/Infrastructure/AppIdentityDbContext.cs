@@ -3,65 +3,64 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace IdentityService.Infrastructure
-{
-    public class AppIdentityDbContext : IdentityDbContext<User, Role, string>
-    {
-        public AppIdentityDbContext(DbContextOptions<AppIdentityDbContext> options) : base(options)
-        { }
+namespace IdentityService.Infrastructure;
 
-        protected override void OnModelCreating(ModelBuilder builder)
+public class AppIdentityDbContext : IdentityDbContext<User, Role, string>
+{
+    public AppIdentityDbContext(DbContextOptions<AppIdentityDbContext> options) : base(options)
+    { }
+
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
+    }
+
+    private static readonly string Password = "Pa$$w0rd";
+
+    public static async Task SeedDatabaseAsync(UserManager<User> userManager, RoleManager<Role> roleManager)
+    {
+        var roles = new List<Role>();
+
+        if (!roleManager.Roles.Any())
         {
-            base.OnModelCreating(builder);
+            roles.Add(new Role(Entities.UserRoles.Administrator));
+            roles.Add(new Role(Entities.UserRoles.SuperUser));
+            roles.Add(new Role(Entities.UserRoles.User));
+
+            foreach (var role in roles)
+            {
+                await roleManager.CreateAsync(role);
+            }
         }
 
-        private static readonly string Password = "Pa$$w0rd";
-
-        public static async Task SeedDatabaseAsync(UserManager<User> userManager, RoleManager<Role> roleManager)
+        if (!userManager.Users.Any())
         {
-            var roles = new List<Role>();
-
-            if (!roleManager.Roles.Any())
+            var userBob = new User
             {
-                roles.Add(new Role(Entities.UserRoles.Administrator));
-                roles.Add(new Role(Entities.UserRoles.SuperUser));
-                roles.Add(new Role(Entities.UserRoles.User));
+                FirstName = "Bob",
+                LastName = "Doe",
+                UserName = "bob.doe",
+                Email = "bob@test.com"
+            };
 
-                foreach (var role in roles)
-                {
-                    await roleManager.CreateAsync(role);
-                }
+            var resultBob = await userManager.CreateAsync(userBob, Password);
+            if (resultBob.Succeeded && roles.Any())
+            {
+                await userManager.AddToRoleAsync(userBob, roles[0].Name!);
             }
 
-            if (!userManager.Users.Any())
+            var userAlice = new User
             {
-                var userBob = new User
-                {
-                    FirstName = "Bob",
-                    LastName = "Doe",
-                    UserName = "bob.doe",
-                    Email = "bob@test.com"
-                };
+                FirstName = "Alice",
+                LastName = "Doe",
+                UserName = "alice.doe",
+                Email = "alice@test.com"
+            };
 
-                var resultBob = await userManager.CreateAsync(userBob, Password);
-                if (resultBob.Succeeded && roles.Any())
-                {
-                    await userManager.AddToRoleAsync(userBob, roles[0].Name!);
-                }
-
-                var userAlice = new User
-                {
-                    FirstName = "Alice",
-                    LastName = "Doe",
-                    UserName = "alice.doe",
-                    Email = "alice@test.com"
-                };
-
-                var resultAlice = await userManager.CreateAsync(userAlice, Password);
-                if (resultAlice.Succeeded && roles.Any())
-                {
-                    await userManager.AddToRoleAsync(userAlice, roles[1].Name!);
-                }
+            var resultAlice = await userManager.CreateAsync(userAlice, Password);
+            if (resultAlice.Succeeded && roles.Any())
+            {
+                await userManager.AddToRoleAsync(userAlice, roles[1].Name!);
             }
         }
     }

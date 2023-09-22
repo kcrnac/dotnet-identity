@@ -1,7 +1,6 @@
-﻿namespace IdentityService.Abstraction.Configuration
+﻿namespace IdentityService.Abstraction.Configuration;
+
+internal interface IConfigurationOption
 {
-    internal interface IConfigurationOption
-    {
-        string GetSectionName();
-    }
+    string GetSectionName();
 }

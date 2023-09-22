@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 using IdentityService.Models;
@@ -30,10 +29,7 @@ public static class ServiceExtensions
             options.UseNpgsql(configuration.GetConnectionString(ConnectionStringName));
         });
 
-        services.AddIdentity<User, Role>(options =>
-            {
-
-            })
+        services.AddIdentity<User, Role>()
             .AddEntityFrameworkStores<AppIdentityDbContext>()
             .AddDefaultTokenProviders();
 
@@ -47,7 +43,7 @@ public static class ServiceExtensions
                  *  Seems that issue started appear after changing services.AddIdentityCore -> services.AddIdentity
                  *  And once custom Roles were introduced into Identity
                  *  Logs
-                 *      Request starting HTTP/2 GET https://localhost:5001/api/Home/authenticated - -
+                 *      Request starting HTTP/2 GET https://localhost:5001/api/Home/authenticated
                         info: Microsoft.AspNetCore.Authorization.DefaultAuthorizationService[2]
                               Authorization failed. These requirements were not met:
                               DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
@@ -163,7 +159,7 @@ public static class ServiceExtensions
                     .ToArray();
 
                 var response = new ApiValidationErrorResponse(errors);
-             
+
                 return new BadRequestObjectResult(response);
             };
         });
