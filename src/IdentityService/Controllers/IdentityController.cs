@@ -2,6 +2,7 @@
 using IdentityService.Dtos;
 using IdentityService.Entities;
 using IdentityService.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,13 +10,13 @@ namespace IdentityService.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AccountController : ControllerBase
+public class IdentityController : ControllerBase
 {
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
     private readonly ITokenService _tokenService;
 
-    public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, ITokenService tokenService)
+    public IdentityController(UserManager<User> userManager, SignInManager<User> signInManager, ITokenService tokenService)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -84,5 +85,30 @@ public class AccountController : ControllerBase
         };
 
         return Ok(response);
+    }
+
+    [HttpGet("authenticated")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public ActionResult<string> AuthenticatedOnly()
+    {
+        return Ok("You're authenticated");
+    }
+
+    [HttpGet("authorized")]
+    [Authorize(Roles = UserRoles.Administrator)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public ActionResult<string> AuthorizedOnly()
+    {
+        return Ok($"You're authorized as {UserRoles.Administrator}");
+    }
+
+    [HttpGet("anonymous")]
+    public ActionResult<string> Anonymous()
+    {
+        return Ok($"This is publicly available");
     }
 }

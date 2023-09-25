@@ -1,3 +1,9 @@
+networks:
+  custom-network:
+    ipam:
+      config:
+        - subnet: 10.5.0.0/16
+
 version: "3.8"
 services:
   postgres:
@@ -9,16 +15,42 @@ services:
       - 5432:5432
     volumes:
       - /var/lib/postgresql/data
+    networks:
+      custom-network:
   identity-svc:
     image: kcrnac/dotnet-identity:latest
     build:
       context: .
       dockerfile: src/identityService/Dockerfile
     environment:
-      - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:80
       - ConnectionStrings__Identity=Server=postgres:5432;User Id=postgres;Password=postgres;Database=identity
-    ports:
-      - 5000:80
+      - Jwt__Issuer=http://identity-svc
+    # Enable in case you want to access service directly from host (localhost)
+    #    ports:
+    #      - 5000:80
     depends_on:
       - postgres
+    networks:
+      custom-network:
+  gateway-svc:
+    image: kcrnac/dotnet-identity-gateway:latest
+    build:
+      context: .
+      dockerfile: src/GatewayService/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:80
+      - VIRTUAL_HOST=dotnet-identity.gateway
+    networks:
+      custom-network:
+  nginx-proxy:
+    image: nginxproxy/nginx-proxy
+    ports:
+      - 80:80
+      - 443:443
+    networks:
+      custom-network:
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./certificates/:/etc/nginx/certs
