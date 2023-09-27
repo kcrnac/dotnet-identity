@@ -28,7 +28,7 @@ services:
       - Jwt__Issuer=http://identity-svc
     # Enable in case you want to access service directly from host (localhost)
     #    ports:
-    #      - 5000:80
+    #      - 5001:80
     depends_on:
       - postgres
     networks:

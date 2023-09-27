@@ -5,11 +5,12 @@ using IdentityService.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace IdentityService.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("[controller]")]
 public class IdentityController : ControllerBase
 {
     private readonly UserManager<User> _userManager;
@@ -97,13 +98,15 @@ public class IdentityController : ControllerBase
     }
 
     [HttpGet("authorized")]
-    [Authorize(Roles = UserRoles.Administrator)]
+    [Authorize(Roles = $"{UserRoles.Administrator},{UserRoles.SuperUser}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public ActionResult<string> AuthorizedOnly()
     {
-        return Ok($"You're authorized as {UserRoles.Administrator}");
+        var userRoles = User.Claims.Where(p => p.Type.Equals(ClaimTypes.Role)).Select(p => p.Value).ToArray();
+
+        return Ok($"You have the following roles: {string.Join(',', userRoles)}");
     }
 
     [HttpGet("anonymous")]
