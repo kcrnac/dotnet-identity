@@ -42,6 +42,8 @@ services:
       - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:80
       - VIRTUAL_HOST=dotnet-identity.gateway
+    ports:
+      - 5000:80
     networks:
       custom-network:
   nginx-proxy:
