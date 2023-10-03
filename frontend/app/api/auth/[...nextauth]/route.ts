@@ -16,14 +16,13 @@ export const authOptions: NextAuthOptions = {
         password: { type: "password" },
       },
       async authorize(credentials, req) {
-        console.log("==> authorized", JSON.stringify(credentials));
         try {
           const response = await login({
             email: credentials?.email,
             password: credentials?.password,
           });
 
-          return response?.data;
+          return response;
         } catch (err) {}
       },
     }),

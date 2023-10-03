@@ -94,7 +94,7 @@ public class IdentityController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public ActionResult<string> AuthenticatedOnly()
     {
-        return Ok("You're authenticated");
+        return Ok(new ResponseDto<string>("You're authenticated"));
     }
 
     [HttpGet("authorized")]
@@ -106,12 +106,12 @@ public class IdentityController : ControllerBase
     {
         var userRoles = User.Claims.Where(p => p.Type.Equals(ClaimTypes.Role)).Select(p => p.Value).ToArray();
 
-        return Ok($"You have the following roles: {string.Join(',', userRoles)}");
+        return Ok(new ResponseDto<string>($"You have the following roles: {string.Join(',', userRoles)}"));
     }
 
     [HttpGet("anonymous")]
     public ActionResult<string> Anonymous()
     {
-        return Ok($"This is publicly available");
+        return Ok(new ResponseDto<string>($"This is publicly available"));
     }
 }

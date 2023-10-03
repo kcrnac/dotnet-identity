@@ -1,11 +1,11 @@
 "use server";
 
-import { axiosWrapper } from "@/lib/axiosWrapper";
+import { fetchWrapper } from "@/lib/fetchWrapper";
 
 export async function login(data: {}) {
-  return await axiosWrapper.post("/identity/login", data);
+  return await fetchWrapper.post("/identity/login", data);
 }
 
-export async function authorized() {
-  return await axiosWrapper.get("/identity/authenticated");
+export async function authenticated() {
+  return await fetchWrapper.get("/identity/authenticated");
 }

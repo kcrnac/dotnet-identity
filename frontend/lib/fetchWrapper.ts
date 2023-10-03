@@ -8,59 +8,52 @@ async function post(url: string, body: {}) {
     headers: await getHeaders(),
     body: JSON.stringify(body),
   };
+
   const response = await fetch(baseUrl + url, requestOptions);
+
   return await handleResponse(response);
 }
 
 async function get(url: string) {
   const requestOptions = {
     method: "GET",
-    header: await getHeaders(),
+    headers: await getHeaders(),
   };
 
   const response = await fetch(baseUrl + url, requestOptions);
+
   return await handleResponse(response);
 }
 
 async function getHeaders() {
   const token = await getToken();
-  const headers = { "Content-type": "application/json" } as any;
+  const headers = { "Content-Type": "application/json" } as any;
   if (token) {
     headers.Authorization = "Bearer " + token;
   }
 
-  console.log("HEADERS" + JSON.stringify(headers));
-
   return headers;
 }
 
-async function handleResponse(response: Response) {
-  const text = await response.text();
-  // const data = text && JSON.parse(text);
+async function handleResponse(response: any) {
+  let data = await response.text();
+  const statusCode = response.status;
 
-  console.log("TEXT" + response.status);
-  let data;
   try {
-    data = JSON.parse(text);
-  } catch (error) {
-    data = text;
-  }
+    data = JSON.parse(data);
+  } catch (error) {}
 
   if (response.ok) {
-    return data || response.statusText;
+    return { ...data, status: statusCode };
   } else {
-    const error = {
-      status: response.status,
-      message:
-        typeof data === "string" && data.length > 0
-          ? data
-          : response.statusText,
-    };
-    return { error };
+    const message =
+      typeof data === "string" && data.length > 0 ? data : response.statusText;
+
+    return { message, status: statusCode };
   }
 }
 
-export const axiosWrapper = {
+export const fetchWrapper = {
   post,
   get,
 };

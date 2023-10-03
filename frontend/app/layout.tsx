@@ -3,7 +3,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Navbar from "@/components/Navbar";
 import Provider from "./providers/Provider";
-import { Session } from "next-auth";
+import { authOptions } from "./api/auth/[...nextauth]/route";
+import { getServerSession } from "next-auth";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -12,19 +13,18 @@ export const metadata: Metadata = {
   description: "dotnet-identity",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
-  session,
 }: {
   children: React.ReactNode;
-  session: Session;
 }) {
+  const session = await getServerSession(authOptions);
   return (
     <html lang="en">
       <Provider session={session}>
         <body className={inter.className}>
-          <Navbar />
-          <div className="container h-full mx-auto">{children}</div>
+          <Navbar session={session} />
+          <div className="container h-full mx-auto pt-5">{children}</div>
         </body>
       </Provider>
     </html>

@@ -1,24 +1,17 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useEffect } from "react";
-import { authorized } from "./actions/actions";
+import RequestCard from "@/components/RequestCard";
 
 export default function Home() {
   const { data: session } = useSession();
 
-  useEffect(() => {
-    authorized().then((res: any) => {
-      //console.log(JSON.stringify(res));
-    });
-  }, []);
-
-  console.log(session);
-
   return (
     <div>
-      <h1>Home</h1>
-      <h2>{session?.access_token}</h2>
+      <div className="grid grid-cols-3 max-md:grid-cols-1">
+        <RequestCard />
+        <RequestCard />
+      </div>
     </div>
   );
 }

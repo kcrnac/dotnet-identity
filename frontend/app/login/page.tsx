@@ -41,10 +41,9 @@ const LoginPage = () => {
   function onSubmit(values: z.infer<typeof formSchema>) {
     signIn("credentials", {
       ...values,
-      redirect: false,
+      redirect: true,
+      callbackUrl: "/",
     });
-
-    router.push("/");
   }
 
   return (
