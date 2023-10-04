@@ -20,13 +20,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { signOut } from "next-auth/react";
-
 const MainNav = ({ session }: { session: Session | null }) => {
   return (
-    <header className="inset-x-0 h-fit bg-background/95 mb-3">
+    <header className="inset-x-0 h-fit bg-background/95 mb- invert-0">
       <div className="container flex h-14 items-center justify-between">
         <Logo />
-        <div className="flex content-center">
+        <div className="flex-1 flex justify-center">
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>
@@ -35,8 +34,8 @@ const MainNav = ({ session }: { session: Session | null }) => {
             </NavigationMenuList>
           </NavigationMenu>
         </div>
-        <div>
-          <Button asChild>
+        <div className="flex flex-1">
+          <div className="ml-auto">
             {session?.user?.name ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -51,7 +50,7 @@ const MainNav = ({ session }: { session: Session | null }) => {
             ) : (
               <Link href={"/login"}>Login</Link>
             )}
-          </Button>
+          </div>
         </div>
       </div>
     </header>

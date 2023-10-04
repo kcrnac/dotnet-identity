@@ -5,7 +5,7 @@ import React from "react";
 
 const Logo = () => {
   return (
-    <div className="font-bold">
+    <div className="font-bold flex-1">
       <Link href="/">dotnet-identity</Link>
     </div>
   );

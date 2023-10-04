@@ -62,7 +62,8 @@ public static class ServiceExtensions
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Key)),
                     ValidIssuer = jwtOptions.Issuer,
                     ValidateIssuer = true,
-                    ValidateAudience = false
+                    ValidateAudience = false,
+                    ClockSkew = TimeSpan.Zero // Explained here: https://stackoverflow.com/questions/39728519/jwtsecuritytoken-doesnt-expire-when-it-should
                 };
             });
 
