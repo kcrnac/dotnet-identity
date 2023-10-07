@@ -1,13 +1,12 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import * as z from "zod";
 
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -15,8 +14,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { signIn } from "next-auth/react";
+import { signIn, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 const formSchema = z.object({
   email: z.string().email({
@@ -38,12 +38,19 @@ const LoginPage = () => {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    signIn("credentials", {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    var response = await signIn("credentials", {
       ...values,
-      redirect: true,
+      redirect: false,
       callbackUrl: "/",
     });
+
+    if (response?.ok) {
+      router.replace("/");
+      router.refresh();
+    } else {
+      toast.error(response?.error!);
+    }
   }
 
   return (

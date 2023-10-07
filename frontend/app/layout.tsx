@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import Provider from "./providers/Provider";
 import { authOptions } from "./api/auth/[...nextauth]/route";
 import { getServerSession } from "next-auth";
+import ToasterProvider from "./providers/ToasterProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,6 +24,7 @@ export default async function RootLayout({
     <html lang="en">
       <Provider session={session}>
         <body className={inter.className}>
+          <ToasterProvider />
           <Navbar session={session} />
           <div className="container h-full mx-auto pt-5">{children}</div>
         </body>

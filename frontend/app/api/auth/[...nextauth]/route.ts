@@ -6,7 +6,6 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
   },
-  secret: "somesecret",
   debug: true,
   providers: [
     CredentialsProvider({
@@ -15,15 +14,21 @@ export const authOptions: NextAuthOptions = {
         email: { type: "email" },
         password: { type: "password" },
       },
-      async authorize(credentials, req) {
+      async authorize(credentials) {
         try {
           const response = await login({
             email: credentials?.email,
             password: credentials?.password,
           });
 
-          return response;
-        } catch (err) {}
+          if (response?.status === 200) {
+            return response;
+          }
+
+          return Promise.reject(new Error(response?.message));
+        } catch (err) {
+          throw err;
+        }
       },
     }),
   ],
