@@ -46,6 +46,19 @@ services:
       - 5000:80
     networks:
       custom-network:
+  web-app:
+    image: kcrnac/dotnet-web-app:latest
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    volumes:
+      - /var/lib/web/data
+    environment:
+      - NEXTAUTH_SECRET=KY7h6YevCC3DULVW7ZFBP2Uhh8m1wqQ9
+      - NEXTAUTH_URL=https://dotnet-identity.gateway # Must be used as public URL because of NextJS internal URL redirects; When not used it redirects to localhost
+      - API_URL=http://identity-svc
+    networks:
+      custom-network:
   nginx-proxy:
     image: nginxproxy/nginx-proxy
     ports:
