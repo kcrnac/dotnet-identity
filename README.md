@@ -33,7 +33,7 @@ From technical perspective _**IdentityService**_ project contains most of the "l
    ```
    docker compose build
    ```
-4. Once build has completed successfuly, start the services
+4. Once build has completed successfully, start the services
    ```
    docker compose up -d
    ```
@@ -41,7 +41,7 @@ From technical perspective _**IdentityService**_ project contains most of the "l
    ```
    mkcert -install
    ```
-6. Next, create your own certificate and key file and replace the one which came with this repository.
+6. Next, create your own certificate and key file, replacing the one which came with this repository.
 
    1. Navigate to certificates folder using terminal
 
