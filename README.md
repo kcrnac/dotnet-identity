@@ -29,19 +29,11 @@ From technical perspective _**IdentityService**_ project contains most of the "l
    ```
    https://github.com/kcrnac/dotnet-identity.git
    ```
-3. Using terminal, VS Code, or any other tool you prefer, navigate to the root folder of the cloned repository on your local machine and run the following command that will build all of the services and create docker images
-   ```
-   docker compose build
-   ```
-4. Once build has completed successfully, start the services
-   ```
-   docker compose up -d
-   ```
-5. In order to access API & Web App you will need to provide an SSL certificate which you can do by first installing 'mkcert' from their [official repository](https://github.com/FiloSottile/mkcert). Once installed, run the command to install the local Certificate Authority (CA)
+3. In order to access API & Web App you will need to provide an SSL certificate which you can create by first installing 'mkcert' from their [official repository](https://github.com/FiloSottile/mkcert). Once installed, run the command to install the local Certificate Authority (CA)
    ```
    mkcert -install
    ```
-6. Next, create your own certificate and key file, replacing the one which came with this repository.
+4. Next, create your own certificate and key file, replacing the one which came with this repository.
 
    1. Navigate to certificates folder using terminal
 
@@ -54,6 +46,15 @@ From technical perspective _**IdentityService**_ project contains most of the "l
       ```
       mkcert -key-file dotnet-identity.com.key -cert-file dotnet-identity.com.crt  api.dotnet-identity.com app.dotnet-identity.com
       ```
+
+5. Using terminal, VS Code, or any other tool you prefer, navigate to the root folder of the cloned repository on your local machine and run the following command that will build all of the services and create docker images
+   ```
+   docker compose build
+   ```
+6. Once build has completed successfully, start the services
+   ```
+   docker compose up -d
+   ```
 
 7. Update your host file in order to access the application by its domain name. If you're not sure how to do it, please follow this [guide](https://docs.rackspace.com/docs/modify-your-hosts-file).
    ```
