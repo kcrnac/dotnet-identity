@@ -18,7 +18,7 @@ services:
     networks:
       custom-network:
   identity-svc:
-    image: kcrnac/dotnet-identity:latest
+    image: dotnet-identity:latest
     build:
       context: .
       dockerfile: src/identityService/Dockerfile
@@ -34,14 +34,32 @@ services:
     networks:
       custom-network:
   gateway-svc:
-    image: kcrnac/dotnet-identity-gateway:latest
+    image: dotnet-identity-gateway:latest
     build:
       context: .
       dockerfile: src/GatewayService/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:80
-      - VIRTUAL_HOST=dotnet-identity.gateway
+      - VIRTUAL_HOST=api.dotnet-identity.com
+    ports:
+      - 5000:80
+    networks:
+      custom-network:
+  web-app:
+    image: dotnet-web-app:latest
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    volumes:
+      - /var/lib/web/data
+    environment:
+      - NEXTAUTH_SECRET=KY7h6YevCC3DULVW7ZFBP2Uhh8m1wqQ9
+      - NEXTAUTH_URL=http://app.dotnet-identity.com
+      - NEXTAUTH_URL_INTERNAL=http://web-app:3000
+      - API_URL=http://identity-svc
+      - VIRTUAL_HOST=app.dotnet-identity.com
+      - VIRTUAL_PORT=3000
     networks:
       custom-network:
   nginx-proxy:
